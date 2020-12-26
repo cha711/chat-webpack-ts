@@ -26,7 +26,7 @@ export default async (
   document.getElementsByClassName('line-bc')[0].innerHTML = '';
 
   const _uid = await firebase.auth().currentUser?.uid;
-  list.map((m, i) => {
+  list.map(m => {
     const _messages = reactStringReplace(
       m.message,
       /(https?:\/\/\S+)/g,
@@ -35,6 +35,7 @@ export default async (
       }
     );
 
+    // 右
     if (m.uid === _uid) {
       const _html = `
         <div>
@@ -71,6 +72,7 @@ export default async (
       return;
     }
 
+    // 左
     const _html = `
       <div>
         <div style="color: #fff; font-size: 12px;">

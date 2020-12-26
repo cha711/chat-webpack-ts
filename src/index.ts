@@ -1,5 +1,6 @@
 import init from './init';
-import post from './post';
+import _event from './event';
 
 init();
-post();
+_event.post();
+_event.enter();

@@ -7,7 +7,7 @@ export default class {
     return 'リアルタイムチャット';
   }
 
-  static get pushNotificationURL() {
+  static get pushNotification() {
     return {
       url: 'https://yuzuru-line.netlify.app/.netlify/functions/api/v1/push',
       authorization: 'Bearer abc',

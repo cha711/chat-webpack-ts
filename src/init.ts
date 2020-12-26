@@ -2,9 +2,9 @@ import * as _ from 'lodash';
 
 import firebase from './firebase';
 import constant from './constant';
-import { pushNotification } from './util';
-import state from './state';
+import { dom, pushNotification } from './util';
 import setList from './list';
+import _event from './event';
 
 export default () => {
   const _connectionMonitoring = async () => {
@@ -27,9 +27,9 @@ export default () => {
 
     firebase
       .database()
-      .ref('connections')
+      .ref(constant.table.connections)
       .on('value', s => {
-        (document.getElementById('_su') as HTMLElement).textContent =
+        dom(document.getElementById('_su')).textContent =
           '接続ユーザ数: ' + s.numChildren();
       });
   };
@@ -48,10 +48,9 @@ export default () => {
 
         setList(_.orderBy(_data, 'createdAt', 'desc'));
 
-        // くるくるもどす
-        (document.getElementById('_loading') as HTMLElement).style.display =
-          'none';
-        (document.getElementById('app') as HTMLElement).style.display = 'block';
+        // ローディング画面から遷移
+        dom(document.getElementById('_loading')).style.display = 'none';
+        dom(document.getElementById('app')).style.display = 'block';
 
         _connectionMonitoring();
       });
@@ -65,49 +64,19 @@ export default () => {
     }
 
     if (data.providerData.length !== 0) {
-      (document.getElementById('button') as HTMLElement).innerHTML = `
-        <button type="button" class="btn btn-danger" id="logout">ログアウト</button>
-      `;
+      // ログインボタンを描画する
+      dom(document.getElementById('button')).innerHTML = `
+      <button type="button" class="btn btn-danger" id="logout">ログアウト</button>
+    `;
 
-      (document.getElementById('logout') as HTMLElement).onclick = () => {
-        firebase.database().goOffline();
-        firebase
-          .auth()
-          .signOut()
-          .then(() => {
-            location.reload();
-          })
-          .catch(error => {});
-      };
+      _event.logout();
     } else {
-      (document.getElementById('button') as HTMLElement).innerHTML = `
-        <button type="button" class="btn btn-success" id="login">ログイン</button>
-      `;
+      // ログアウトボタンを描画する
+      dom(document.getElementById('button')).innerHTML = `
+      <button type="button" class="btn btn-success" id="login">ログイン</button>
+    `;
 
-      (document.getElementById('login') as HTMLElement).onclick = async () => {
-        // ローディング画面にする
-        (document.getElementById('_loading') as HTMLElement).style.display =
-          'block';
-        (document.getElementById('app') as HTMLElement).style.display = 'none';
-
-        state.setPopUp(true);
-
-        // delete connections
-        firebase
-          .database()
-          .ref(constant.table.connections)
-          .child((await firebase.auth().currentUser?.uid) as string)
-          .remove();
-
-        const provider = new firebase.auth.TwitterAuthProvider();
-        firebase
-          .auth()
-          .signInWithPopup(provider)
-          .then(async result => {
-            location.reload();
-          })
-          .catch(e => location.reload());
-      };
+      _event.login();
     }
 
     // lineに通知
